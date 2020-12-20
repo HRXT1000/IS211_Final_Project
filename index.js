@@ -1,88 +1,44 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import { startCase, toLower, get } from 'lodash';
+import { format } from 'date-fns';
+import config from '../../config/photo-config';
 
-export default class Login extends Component {
-
+export default class Blog extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            user: '',
-            password: '',
-            error: false
-        };
-    }
-
-    submitFormRequest() {
-        const { user, password } = this.state;
-
-        if(user && password) {
-            axios
-            .post('/signin', { user, password })
-            .then(res => {
-                const { data } = res;
-                const { verified, id } = data;
-                if (verified) {
-                    this.props.history.push({
-                        pathname: '/dashboard', 
-                        state: { user, userId: id }
-                    });
-                }
-            })
-            .catch(err => {
-                console.log(err, 'ERROR-AT-LOGIN');
-                this.setState({error: true});
-            });
-        } 
-    }
-
-    handleUserInput(event) {
-        this.setState(
-            { user: event.target.value }
-        );
-    }
-
-    handlePasswordInput(event) {
-        this.setState(
-            { password: event.target.value }
-        );
+        this.state = {};
     }
 
     render() {
-        const { user, password } = this.state;
+        const {
+            category,
+            content,
+            pub_date,
+            title,
+            user
+        } = this.props;
+
+        const photo_url = get(config, category, config.fallback);
 
         return (
-            <div className="login-container">
-                <div className="login-form-container">
-                    {
-                        !this.state.error ? 
-                        (<h2>Login or Sign up!
-                            <span className="mini-header-under"></span>
-                        </h2>) : 
-                        (<h2 className="form-login-error">Error! Try again!
-                            <span className="mini-header-under-error"></span>
-                        </h2>)
-                    }
-                    <form name="loginForm" onSubmit={() => this.submitFormRequest()}>
-                        <div>
-                            <div className="input-container">
-                                <div>
-                                    <span>Username</span>
-                                </div>
-                                <input type="text" name="user" value={user} onChange={(event) => this.handleUserInput(event)}/>
-                            </div>
-                            <div className="input-container">
-                                <div>
-                                    <span>Password</span>
-                                </div>
-                                <input type="password" name="password" value={password} onChange={(event) => this.handlePasswordInput(event)}/>
-                            </div>
-                        </div>
-                        <div className="form-submit-button">
-                            <span onClick={() => this.submitFormRequest()}>SUBMIT</span>
-                        </div>
-                    </form>
+            <div className="blog-container">
+                <div className="blog-date">
+                    <div className="blog-date-container">{format(new Date(pub_date), 'MM/dd/yyyy')}</div>
                 </div>
+                <div>
+                    <h2 className="blog-title">{title.toUpperCase()}</h2>
+                </div>
+                <div>
+                    <img src={photo_url} alt={config.fallback} className="blog-image"/>
+                </div>
+                <div className='blog-content'>
+                    <h3>{content}</h3>
+                </div>
+                <div className="blog-post-footer">
+                    <div className='blog-post-user'> { user } </div>
+                    <div className='blog-post-category'> { category } </div>
+                </div> 
             </div>
         );
-    } 
+    }
 }
